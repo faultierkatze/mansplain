@@ -1,0 +1,75 @@
+#!/bin/bash
+
+function randomize {
+  manpage_count="$(man -k . | wc -l)"
+  manpage_number="$(shuf -i 1-$manpage_count -n 1)"
+  manpage="$(man -k . | cut -d ' ' -f 1 | cut -d $'\n' -f $manpage_number)"
+}
+
+annoyance_level=1
+
+
+while [[ $# -gt 0 ]]; do
+
+  case $1 in
+
+    "help" | "-help" | "--help" | "-h" | "-?" )
+      echo -e "mansplain - explains you random stuff from manpages you didn't ask for\n"
+      echo "Usage:"
+      echo "  --help                        Display this help message"
+      echo "  --annoy less|more|extremely   Sets the annoyance level"
+      exit 0
+    ;;
+
+  "--annoy" )
+    if [[ $2 = "less" ]]; then
+      annoyance_level=0
+      shift
+    elif [[ $2 = "more" ]]; then
+      annoyance_level=2
+      shift
+    elif [[ $2 = "extremely" ]]; then
+      annoyance_level=3
+      shift
+    fi
+  ;;
+    
+  esac
+shift
+done
+
+randomize
+
+case $annoyance_level in
+
+  "0" )
+    whatis $manpage | head -1
+  ;;
+
+  "1" )
+
+    man $manpage | head
+    echo -e "[...]\n\nYou turn away annoyedly..."
+  ;;
+
+  "2" )
+    man $manpage | more
+  ;;
+
+  "3" )
+    while true; do
+      man $manpage | more
+      randomize
+    done
+  ;;
+
+esac
+
+exit 0
+
+#  _   _
+# |\___/|
+#  /   \
+#  \___/
+#   _|_
+#    |
